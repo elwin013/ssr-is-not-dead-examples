@@ -26,21 +26,24 @@ public final class TodoController {
     }
 
     private void listTodos(Context ctx) {
-        List<Todo> todos = todoDAOProvider.apply(ctx).getTodos();
-        ctx.render("todos.jte", Map.of(
-                "completed", todos.stream().filter(Todo::done).toList(),
-                "todos", todos.stream().filter(todo -> !todo.done()).toList(),
-                "user", CustomAccessManager.getUserInfo(ctx)));
+        renderTodos(ctx, "", "");
     }
 
     private void createTodo(Context ctx) {
         String content = Optional.ofNullable(ctx.formParam("content")).orElse("").trim();
-        if (!content.isBlank() && content.length() <= 1_000) {
-            Todo todo = todoDAOProvider.apply(ctx).addTodo(content, CustomAccessManager.getUserInfo(ctx));
-            if (isHtmxRequest(ctx)) {
-                ctx.render("components/todoItem.jte", Map.of("todo", todo, "completed", false));
-                return;
-            }
+        if (content.isBlank()) {
+            renderValidationError(ctx, content, "Enter a todo before adding it.");
+            return;
+        }
+        if (content.length() > 1_000) {
+            renderValidationError(ctx, content, "A todo can contain at most 1,000 characters.");
+            return;
+        }
+
+        Todo todo = todoDAOProvider.apply(ctx).addTodo(content, CustomAccessManager.getUserInfo(ctx));
+        if (isHtmxRequest(ctx)) {
+            ctx.render("components/todoCreateResponse.jte", Map.of("todo", todo));
+            return;
         }
 
         ctx.redirect("/");
@@ -77,6 +80,26 @@ public final class TodoController {
         model.put("activeEmpty", todos.stream().noneMatch(todo -> !todo.done()));
         model.put("completedEmpty", todos.stream().noneMatch(Todo::done));
         ctx.render("components/todoActionResponse.jte", model);
+    }
+
+    private void renderValidationError(Context ctx, String content, String validationError) {
+        if (isHtmxRequest(ctx)) {
+            ctx.render("components/todoFormOob.jte", Map.of(
+                    "content", content,
+                    "validationError", validationError));
+            return;
+        }
+        renderTodos(ctx, content, validationError);
+    }
+
+    private void renderTodos(Context ctx, String content, String validationError) {
+        List<Todo> todos = todoDAOProvider.apply(ctx).getTodos();
+        ctx.render("todos.jte", Map.of(
+                "completed", todos.stream().filter(Todo::done).toList(),
+                "todos", todos.stream().filter(todo -> !todo.done()).toList(),
+                "user", CustomAccessManager.getUserInfo(ctx),
+                "content", content,
+                "validationError", validationError));
     }
 
     private static boolean isHtmxRequest(Context ctx) {

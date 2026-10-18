@@ -4,6 +4,8 @@
 @param List<Todo> todos
 @param List<Todo> completed
 @param UserInfo user
+@param String content
+@param String validationError
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,7 +34,7 @@
         </div>
     </nav>
 
-    @template.components.todoForm()
+    @template.components.todoForm(content = content, validationError = validationError)
     @template.components.todoList(todos = todos, completed = false)
     @template.components.todoList(todos = completed, completed = true)
 </main>
