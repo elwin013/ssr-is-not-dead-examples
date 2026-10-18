@@ -12,9 +12,11 @@ import java.util.function.Function;
 
 public final class TodoController {
     private final Function<Context, TodoDAO> todoDAOProvider;
+    private final TenantTodoEventHub tenantTodoEventHub;
 
-    public TodoController(Function<Context, TodoDAO> todoDAOProvider) {
+    public TodoController(Function<Context, TodoDAO> todoDAOProvider, TenantTodoEventHub tenantTodoEventHub) {
         this.todoDAOProvider = todoDAOProvider;
+        this.tenantTodoEventHub = tenantTodoEventHub;
     }
 
     public void registerRoutes(RoutesConfig routes) {
@@ -41,6 +43,7 @@ public final class TodoController {
         }
 
         Todo todo = todoDAOProvider.apply(ctx).addTodo(content, CustomAccessManager.getUserInfo(ctx));
+        publishTodosChanged(ctx);
         if (isHtmxRequest(ctx)) {
             ctx.render("components/todoCreateResponse.jte", Map.of("todo", todo));
             return;
@@ -51,16 +54,19 @@ public final class TodoController {
 
     private void deleteTodo(Context ctx) {
         Todo deletedTodo = todoDAOProvider.apply(ctx).deleteTodo(ctx.pathParam("id"));
+        if (deletedTodo != null) publishTodosChanged(ctx);
         renderMutationOrRedirect(ctx, deletedTodo, null);
     }
 
     private void markAsDone(Context ctx) {
         Todo completedTodo = todoDAOProvider.apply(ctx).markAsDone(ctx.pathParam("id"));
+        if (completedTodo != null) publishTodosChanged(ctx);
         renderMutationOrRedirect(ctx, completedTodo, completedTodo);
     }
 
     private void markAsNotDone(Context ctx) {
         Todo activeTodo = todoDAOProvider.apply(ctx).markAsNotDone(ctx.pathParam("id"));
+        if (activeTodo != null) publishTodosChanged(ctx);
         renderMutationOrRedirect(ctx, activeTodo, activeTodo);
     }
 
@@ -100,6 +106,11 @@ public final class TodoController {
                 "user", CustomAccessManager.getUserInfo(ctx),
                 "content", content,
                 "validationError", validationError));
+    }
+
+    private void publishTodosChanged(Context ctx) {
+        UserInfo user = CustomAccessManager.getUserInfo(ctx);
+        tenantTodoEventHub.publish(user.tenantId(), user.email(), todoDAOProvider.apply(ctx).getTodos());
     }
 
     private static boolean isHtmxRequest(Context ctx) {

@@ -13,6 +13,7 @@ import io.javalin.rendering.template.JavalinJte;
 import net.codeer.todoapp.common.CustomAccessManager;
 import net.codeer.todoapp.common.InMemoryLoginDAO;
 import net.codeer.todoapp.common.LoginController;
+import net.codeer.todoapp.common.TenantTodoEventHub;
 import net.codeer.todoapp.common.TodoController;
 import net.codeer.todoapp.common.TodoDAO;
 import net.codeer.todoapp.psql.PsqlTodoDAO;
@@ -24,19 +25,20 @@ import java.util.function.Function;
 public final class TodoApp {
     static void main() {
         HikariDataSource dataSource = dataSource();
+        TemplateEngine templateEngine = templateEngine();
+        TenantTodoEventHub tenantTodoEventHub = new TenantTodoEventHub(templateEngine);
 
         Function<Context, TodoDAO> todoDAOProvider = ctx ->
                 new PsqlTodoDAO(dataSource, CustomAccessManager.getUserInfo(ctx).tenantId());
 
         Javalin app = Javalin.create(config -> {
             config.startup.showJavalinBanner = false;
-            config.fileRenderer(new JavalinJte(templateEngine()));
+            config.fileRenderer(new JavalinJte(templateEngine));
             config.staticFiles.add("/static", Location.CLASSPATH);
             config.routes.beforeMatched(CustomAccessManager::beforeMatched);
+            config.routes.sse("/todos/events", tenantTodoEventHub::connect);
             new LoginController(new InMemoryLoginDAO(initialUsers())).registerRoutes(config.routes);
-            new TodoController(todoDAOProvider).registerRoutes(config.routes);
-            config.events.serverStopping(dataSource::close);
-
+            new TodoController(todoDAOProvider, tenantTodoEventHub).registerRoutes(config.routes);
             config.events.serverStopping(dataSource::close);
         });
         app.start(7070);

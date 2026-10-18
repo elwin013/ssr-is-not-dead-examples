@@ -14,6 +14,8 @@
     <title>TodoApp</title>
     <link rel="stylesheet" href="/bulma.css">
     <script src="/htmx.js"></script>
+    <script src="/hx-sse.js"></script>
+    <meta name="htmx-config" content='{"extensions":"sse"}'>
 </head>
 <body>
 <main class="container is-max-tablet mt-5 px-4">
@@ -37,6 +39,9 @@
     @template.components.todoForm(content = content, validationError = validationError)
     @template.components.todoList(todos = todos, completed = false)
     @template.components.todoList(todos = completed, completed = true)
+    <div hx-sse:connect="/todos/events"
+         hx-target="#active-todo-list"
+         hx-swap="outerHTML"></div>
 </main>
 </body>
 </html>
