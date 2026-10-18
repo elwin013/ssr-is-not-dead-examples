@@ -5,21 +5,19 @@
 <section class="mt-6">
     @if(completed)
         <h2 class="subtitle">Completed</h2>
+        <div id="completed-todo-list">
+            @if(todos.isEmpty())
+                <p id="empty-completed-todo-list" class="has-text-grey">Nothing completed yet.</p>
+            @endif
+            @for(Todo todo : todos)
+                @template.components.todoItem(todo = todo, completed = true)
+            @endfor
+        </div>
     @else
         <h2 class="subtitle">To do</h2>
-    @endif
-
-    @if(completed)
-        @if(todos.isEmpty())
-            <p class="has-text-grey">Nothing completed yet.</p>
-        @endif
-        @for(Todo todo : todos)
-            @template.components.todoItem(todo = todo, completed = true)
-        @endfor
-    @else
-        <div id="todo-list">
+        <div id="active-todo-list">
             @if(todos.isEmpty())
-                <p id="empty-todo-list" class="has-text-grey">No todos yet.</p>
+                <p id="empty-active-todo-list" class="has-text-grey">No todos yet.</p>
             @endif
             @for(Todo todo : todos)
                 @template.components.todoItem(todo = todo, completed = false)

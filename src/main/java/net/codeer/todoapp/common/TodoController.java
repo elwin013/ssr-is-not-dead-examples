@@ -4,6 +4,7 @@ import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import net.codeer.todoapp.Todo;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public final class TodoController {
         String content = Optional.ofNullable(ctx.formParam("content")).orElse("").trim();
         if (!content.isBlank() && content.length() <= 1_000) {
             Todo todo = todoDAOProvider.apply(ctx).addTodo(content, CustomAccessManager.getUserInfo(ctx));
-            if ("true".equals(ctx.header("HX-Request"))) {
+            if (isHtmxRequest(ctx)) {
                 ctx.render("components/todoItem.jte", Map.of("todo", todo, "completed", false));
                 return;
             }
@@ -46,17 +47,39 @@ public final class TodoController {
     }
 
     private void deleteTodo(Context ctx) {
-        todoDAOProvider.apply(ctx).deleteTodo(ctx.pathParam("id"));
-        ctx.redirect("/");
+        Todo deletedTodo = todoDAOProvider.apply(ctx).deleteTodo(ctx.pathParam("id"));
+        renderMutationOrRedirect(ctx, deletedTodo, null);
     }
 
     private void markAsDone(Context ctx) {
-        todoDAOProvider.apply(ctx).markAsDone(ctx.pathParam("id"));
-        ctx.redirect("/");
+        Todo completedTodo = todoDAOProvider.apply(ctx).markAsDone(ctx.pathParam("id"));
+        renderMutationOrRedirect(ctx, completedTodo, completedTodo);
     }
 
     private void markAsNotDone(Context ctx) {
-        todoDAOProvider.apply(ctx).markAsNotDone(ctx.pathParam("id"));
-        ctx.redirect("/");
+        Todo activeTodo = todoDAOProvider.apply(ctx).markAsNotDone(ctx.pathParam("id"));
+        renderMutationOrRedirect(ctx, activeTodo, activeTodo);
+    }
+
+    private void renderMutationOrRedirect(Context ctx, Todo changedTodo, Todo todoToMove) {
+        if (!isHtmxRequest(ctx)) {
+            ctx.redirect("/");
+            return;
+        }
+        if (changedTodo == null) {
+            ctx.status(404);
+            return;
+        }
+
+        List<Todo> todos = todoDAOProvider.apply(ctx).getTodos();
+        Map<String, Object> model = new HashMap<>();
+        model.put("todoToMove", todoToMove);
+        model.put("activeEmpty", todos.stream().noneMatch(todo -> !todo.done()));
+        model.put("completedEmpty", todos.stream().noneMatch(Todo::done));
+        ctx.render("components/todoActionResponse.jte", model);
+    }
+
+    private static boolean isHtmxRequest(Context ctx) {
+        return "true".equals(ctx.header("HX-Request"));
     }
 }
