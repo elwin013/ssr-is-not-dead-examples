@@ -1,0 +1,18 @@
+# Maven
+/target/
+/jte-classes/
+
+# IntelliJ IDEA: share only project run configurations
+.idea/*
+!.idea/.gitignore
+!.idea/runConfigurations/
+!.idea/runConfigurations/*.xml
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
