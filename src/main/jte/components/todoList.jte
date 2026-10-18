@@ -9,15 +9,21 @@
         <h2 class="subtitle">To do</h2>
     @endif
 
-    @if(todos.isEmpty())
-        @if(completed)
+    @if(completed)
+        @if(todos.isEmpty())
             <p class="has-text-grey">Nothing completed yet.</p>
-        @else
-            <p class="has-text-grey">No todos yet.</p>
         @endif
+        @for(Todo todo : todos)
+            @template.components.todoItem(todo = todo, completed = true)
+        @endfor
+    @else
+        <div id="todo-list">
+            @if(todos.isEmpty())
+                <p id="empty-todo-list" class="has-text-grey">No todos yet.</p>
+            @endif
+            @for(Todo todo : todos)
+                @template.components.todoItem(todo = todo, completed = false)
+            @endfor
+        </div>
     @endif
-
-    @for(Todo todo : todos)
-        @template.components.todoItem(todo = todo, completed = completed)
-    @endfor
 </section>

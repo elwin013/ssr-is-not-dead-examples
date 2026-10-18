@@ -35,8 +35,13 @@ public final class TodoController {
     private void createTodo(Context ctx) {
         String content = Optional.ofNullable(ctx.formParam("content")).orElse("").trim();
         if (!content.isBlank() && content.length() <= 1_000) {
-            todoDAOProvider.apply(ctx).addTodo(content, CustomAccessManager.getUserInfo(ctx));
+            Todo todo = todoDAOProvider.apply(ctx).addTodo(content, CustomAccessManager.getUserInfo(ctx));
+            if ("true".equals(ctx.header("HX-Request"))) {
+                ctx.render("components/todoItem.jte", Map.of("todo", todo, "completed", false));
+                return;
+            }
         }
+
         ctx.redirect("/");
     }
 

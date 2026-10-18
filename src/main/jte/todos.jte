@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TodoApp</title>
     <link rel="stylesheet" href="/bulma.css">
+    <script src="/htmx.js"></script>
 </head>
 <body>
 <main class="container is-max-tablet mt-5 px-4">
