@@ -1,0 +1,47 @@
+{@java.util.List<net.codeer.todoapp.Todo> todos}
+{@java.util.List<net.codeer.todoapp.Todo> completed}
+{@net.codeer.todoapp.common.UserInfo user}
+{@String content}
+{@String validationError}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TodoApp</title>
+    <link rel="stylesheet" href="/bulma.css">
+    <script src="/htmx.js"></script>
+    <script src="/hx-sse.js"></script>
+    <meta name="htmx-config" content='{"extensions":"sse"}'>
+</head>
+<body>
+<main class="container is-max-tablet mt-5 px-4">
+    <nav class="level is-mobile">
+        <div class="level-left"><div><h1 class="title mb-1">TodoApp</h1><p class="subtitle is-6">Tenant: {user.tenantName}</p></div></div>
+        <div class="level-right"><div class="has-text-right"><p class="is-size-7 has-text-grey">{user.email}</p><form action="/logout" method="post"><button class="button is-light is-small mt-1">Sign out</button></form></div></div>
+    </nav>
+
+    <div id="todo-form" class="mb-6">
+        <form action="/todos" method="post" hx-post="/todos" hx-swap="none">
+            <div class="field has-addons"><div class="control is-expanded"><input autofocus class="input{#if validationError} is-danger{/if}" name="content" maxlength="1000" placeholder="New todo" value="{content}"></div><div class="control"><button class="button is-primary">Add</button></div></div>
+            {#if validationError}<p class="help is-danger">{validationError}</p>{/if}
+        </form>
+    </div>
+
+    <section class="mt-6"><h2 class="subtitle">To do</h2><div id="active-todo-list">
+        {#if todos.isEmpty}<p id="empty-active-todo-list" class="has-text-grey">No todos yet.</p>{/if}
+        {#for todo in todos}
+        <article id="todo-{todo.id}" class="card mb-3"><div class="card-content py-4"><div class="is-flex is-align-items-center is-justify-content-space-between" style="gap: 1rem"><div><p>{todo.content}</p><p class="is-size-7 has-text-grey">created by: {todo.createdBy}</p></div><form action="/todos/{todo.id}/done" method="post" hx-post="/todos/{todo.id}/done" hx-target="#todo-{todo.id}" hx-swap="delete"><button class="button is-primary is-small">Done</button></form></div></div></article>
+        {/for}
+    </div></section>
+
+    <section class="mt-6"><h2 class="subtitle">Completed</h2><div id="completed-todo-list">
+        {#if completed.isEmpty}<p id="empty-completed-todo-list" class="has-text-grey">Nothing completed yet.</p>{/if}
+        {#for todo in completed}
+        <article id="todo-{todo.id}" class="card mb-3"><div class="card-content py-4"><div class="is-flex is-align-items-center is-justify-content-space-between" style="gap: 1rem"><div><p><del>{todo.content}</del></p><p class="is-size-7 has-text-grey">created by: {todo.createdBy}</p></div><div class="buttons are-small"><form action="/todos/{todo.id}/undone" method="post" hx-post="/todos/{todo.id}/undone" hx-target="#todo-{todo.id}" hx-swap="delete"><button class="button">Undo</button></form><form action="/todos/{todo.id}/delete" method="post" hx-post="/todos/{todo.id}/delete" hx-target="#todo-{todo.id}" hx-swap="delete"><button class="button is-danger is-light">Delete</button></form></div></div></div></article>
+        {/for}
+    </div></section>
+    <div hx-sse:connect="/todos/events" hx-target="#active-todo-list" hx-swap="outerHTML"></div>
+</main>
+</body>
+</html>

@@ -1,6 +1,9 @@
-# Todoapp – base SSR + PSQL Schema-Per-Tenant
+# Todoapp – Quarkus + PSQL Schema-Per-Tenant
 
-A small, complete example of classic SSR with tenant isolation in PostgreSQL.
+A small Quarkus example - uses Quarkus REST, Qute checked templates, htmx and PostgreSQL schema-per-tenant isolation.
+
+Renders full pages and HTML fragments on the server, keeps validation in Java, and delivers realtime updates through SSE. 
+Qute checked templates make the template contract visible to Java at build time.
 
 ## Running from the terminal
 
@@ -12,8 +15,8 @@ Application automatically loads `PSQL_CONNECTION_STRING` from it.
 # Start PostgreSQL in the background
 docker compose --env-file .env -f src/main/docker/docker-compose.yml up -d
 
-# Compile and start the application
-mvn compile exec:java
+# Start the Quarkus application in development mode
+mvn quarkus:dev
 ```
 
 The app is available at `http://localhost:7070`.

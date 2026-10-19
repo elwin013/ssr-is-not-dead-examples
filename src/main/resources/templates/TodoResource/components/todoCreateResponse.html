@@ -1,0 +1,6 @@
+{@net.codeer.todoapp.Todo todo}
+<div hx-swap-oob="afterbegin:#active-todo-list">
+    <article id="todo-{todo.id}" class="card mb-3"><div class="card-content py-4"><div class="is-flex is-align-items-center is-justify-content-space-between" style="gap: 1rem"><div><p>{todo.content}</p><p class="is-size-7 has-text-grey">created by: {todo.createdBy}</p></div><form action="/todos/{todo.id}/done" method="post" hx-post="/todos/{todo.id}/done" hx-target="#todo-{todo.id}" hx-swap="delete"><button class="button is-primary is-small">Done</button></form></div></div></article>
+</div>
+<span id="empty-active-todo-list" hx-swap-oob="delete"></span>
+<div id="todo-form" class="mb-6" hx-swap-oob="outerHTML"><form action="/todos" method="post" hx-post="/todos" hx-swap="none"><div class="field has-addons"><div class="control is-expanded"><input autofocus class="input" name="content" maxlength="1000" placeholder="New todo" value=""></div><div class="control"><button class="button is-primary">Add</button></div></div></form></div>

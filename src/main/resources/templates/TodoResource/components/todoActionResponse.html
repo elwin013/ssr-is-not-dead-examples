@@ -1,0 +1,12 @@
+{@net.codeer.todoapp.Todo todoToMove}
+{@boolean activeEmpty}
+{@boolean completedEmpty}
+{#if todoToMove}
+    {#if todoToMove.done}
+    <div hx-swap-oob="afterbegin:#completed-todo-list"><article id="todo-{todoToMove.id}" class="card mb-3"><div class="card-content py-4"><div class="is-flex is-align-items-center is-justify-content-space-between" style="gap: 1rem"><div><p><del>{todoToMove.content}</del></p><p class="is-size-7 has-text-grey">created by: {todoToMove.createdBy}</p></div><div class="buttons are-small"><form action="/todos/{todoToMove.id}/undone" method="post" hx-post="/todos/{todoToMove.id}/undone" hx-target="#todo-{todoToMove.id}" hx-swap="delete"><button class="button">Undo</button></form><form action="/todos/{todoToMove.id}/delete" method="post" hx-post="/todos/{todoToMove.id}/delete" hx-target="#todo-{todoToMove.id}" hx-swap="delete"><button class="button is-danger is-light">Delete</button></form></div></div></div></article></div>
+    {#else}
+    <div hx-swap-oob="afterbegin:#active-todo-list"><article id="todo-{todoToMove.id}" class="card mb-3"><div class="card-content py-4"><div class="is-flex is-align-items-center is-justify-content-space-between" style="gap: 1rem"><div><p>{todoToMove.content}</p><p class="is-size-7 has-text-grey">created by: {todoToMove.createdBy}</p></div><form action="/todos/{todoToMove.id}/done" method="post" hx-post="/todos/{todoToMove.id}/done" hx-target="#todo-{todoToMove.id}" hx-swap="delete"><button class="button is-primary is-small">Done</button></form></div></div></article></div>
+    {/if}
+{/if}
+{#if activeEmpty}<p id="empty-active-todo-list" class="has-text-grey" hx-swap-oob="afterbegin:#active-todo-list">No todos yet.</p>{#else}<span id="empty-active-todo-list" hx-swap-oob="delete"></span>{/if}
+{#if completedEmpty}<p id="empty-completed-todo-list" class="has-text-grey" hx-swap-oob="afterbegin:#completed-todo-list">Nothing completed yet.</p>{#else}<span id="empty-completed-todo-list" hx-swap-oob="delete"></span>{/if}
