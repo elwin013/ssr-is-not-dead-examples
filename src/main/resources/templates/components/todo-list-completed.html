@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="list" id="completed-todo-list" th:attr="hx-swap-oob=${oob == true ? 'outerHTML' : null}"><p
+        th:if="${#lists.isEmpty(completed)}" id="empty-completed-todo-list" class="has-text-grey">Nothing completed
+    yet.</p>
+    <th:block th:each="todo : ${completed}" th:with="completed=true">
+        <th:block th:replace="~{components/todo-item :: item}"></th:block>
+    </th:block>
+</div>
+</body>
+</html>

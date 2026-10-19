@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<div th:fragment="list" id="active-todo-list"><p th:if="${#lists.isEmpty(todos)}" id="empty-active-todo-list"
+                                                 class="has-text-grey">No todos yet.</p>
+    <th:block th:each="todo : ${todos}" th:with="completed=false">
+        <th:block th:replace="~{components/todo-item :: item}"></th:block>
+    </th:block>
+</div>
+</body>
+</html>

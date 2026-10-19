@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TodoApp</title>
+    <link rel="stylesheet" href="/bulma.css">
+    <script src="/htmx.js"></script>
+    <script src="/hx-sse.js"></script>
+    <meta name="htmx-config" content='{"extensions":"sse"}'>
+</head>
+<body>
+<main class="container is-max-tablet mt-5 px-4">
+    <nav class="level is-mobile"><div class="level-left"><div><h1 class="title mb-1">TodoApp</h1><p class="subtitle is-6" th:text="|Tenant: ${user.tenantName}|">Tenant:</p></div></div><div class="level-right"><div class="has-text-right"><p class="is-size-7 has-text-grey" th:text="${user.email}"></p><form action="/logout" method="post"><button class="button is-light is-small mt-1">Sign out</button></form></div></div></nav>
+    <div th:replace="~{components/todo-form :: form}"></div>
+    <section class="mt-6"><h2 class="subtitle">To do</h2><div th:replace="~{components/todo-list-active :: list}"></div></section>
+    <section class="mt-6"><h2 class="subtitle">Completed</h2><div th:replace="~{components/todo-list-completed :: list}"></div></section>
+    <div hx-sse:connect="/todos/events" hx-target="#active-todo-list" hx-swap="outerHTML"></div>
+</main>
+</body>
+</html>

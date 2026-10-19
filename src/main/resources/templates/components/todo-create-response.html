@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<body>
+<th:block th:fragment="response">
+    <div hx-swap-oob="afterbegin:#active-todo-list">
+        <th:block th:with="completed=false">
+            <th:block th:replace="~{components/todo-item :: item}"></th:block>
+        </th:block>
+    </div>
+    <span id="empty-active-todo-list" hx-swap-oob="delete"></span>
+    <div id="todo-form" class="mb-6" hx-swap-oob="outerHTML">
+        <form action="/todos" method="post" hx-post="/todos" hx-swap="none">
+            <div class="field has-addons">
+                <div class="control is-expanded"><input autofocus class="input" name="content" maxlength="1000"
+                                                        placeholder="New todo" value=""></div>
+                <div class="control">
+                    <button class="button is-primary">Add</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</th:block>
+</body>
+</html>
